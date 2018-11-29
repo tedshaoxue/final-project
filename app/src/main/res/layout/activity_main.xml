@@ -37,5 +37,13 @@
             android:textColor="@android:color/black"
             android:textStyle="normal" />
 
+        <EditText
+            android:id="@+id/editText6"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:inputType="textMultiLine"
+            android:text="display antnoym" />
+
     </LinearLayout>
 </android.support.design.widget.CoordinatorLayout>
