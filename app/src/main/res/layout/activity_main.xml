@@ -33,10 +33,10 @@
             android:id="@+id/search"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:onClick="findAntonym"
             android:text="Search"
             android:textColor="@android:color/black"
-            android:textStyle="normal"
-            android:onClick="setSearch" />
+            android:textStyle="normal" />
 
         <EditText
             android:id="@+id/displayAntonym"
