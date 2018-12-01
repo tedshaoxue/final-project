@@ -18,16 +18,13 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 
-import org.json.JSONObject;
+import org.json.*;
 
 
 public class MainActivity extends AppCompatActivity {
-    /**
-     * url to call https://www.dictionaryapi.com/api/v3/references/thesaurus/json/umpire?key=your-api-key
-     */
     /* Default Logging Tag */
     private static final String TAG = "Antonym Finder";
-    private static RequestQueue requestQueue;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,6 +43,31 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+     /* Temporary Method*/
+    public String getAntonyms(final JSONObject input) {
+        if (input.getJSONObject("meta").getJSONArray("ants").length() == 0) {
+            return "Word has no antonyms";
+        }
+        String toReturn = "";
+        JSONArray antArray = input
+                .getJSONObject("meta")
+                .getJSONArray("def")
+                .getJSONObject(0)
+                .getJSONArray("sseq")
+                .getJSONArray(0)
+                .getJSONArray(0)
+                .getJSONObject(1)
+                .getJSONArray("ant_list")
+                .getJSONArray(0);
+        for (int i = 0; i < antArray.length(); i++) {
+            toReturn += antArray.getJSONObject(i).getString("wd");
+            if (i < antArray.length() - 1) {
+                toReturn += ", ";
+            }
+        }
+        return toReturn;
+    }
+
     /**
      * method to use api and find the antonyms.
      */
@@ -60,7 +82,9 @@ public class MainActivity extends AppCompatActivity {
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(final JSONObject response) {
+                        String antonyms = getAntonyms(response);
                         Log.d(TAG, response.toString());
+                        displayAntonym.setText(antonyms);
                     }
                 }, new Response.ErrorListener() {
             @Override
@@ -69,16 +93,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
-
-
-
-
-
-
-
-
-
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
