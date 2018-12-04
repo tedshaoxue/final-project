@@ -11,24 +11,33 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 
 import org.json.*;
 
 
 public class MainActivity extends AppCompatActivity {
+    /**
+     * Add try-catch block to api call
+     * Do something with requestQueue
+     * Hope it works
+     */
+
     /* Default Logging Tag */
     private static final String TAG = "Antonym Finder";
-
+    private static RequestQueue requestQueue;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        requestQueue = Volley.newRequestQueue(this);
         setContentView(R.layout.activity_main);
         /*
         Button handlers for antonym search
@@ -43,8 +52,8 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-     /* Temporary Method*/
-    public String getAntonyms(final JSONObject input) {
+    /* Temporary Method*/
+    public String getAntonyms(final JSONObject input) throws JSONException{
         if (input.getJSONObject("meta").getJSONArray("ants").length() == 0) {
             return "Word has no antonyms";
         }
@@ -73,7 +82,7 @@ public class MainActivity extends AppCompatActivity {
      */
     public void findAntonyms() {
         final EditText enter_word = (EditText) findViewById(R.id.enter_word);
-        final EditText displayAntonym = (EditText) findViewById(R.id.displayAntonym);
+        final TextView displayAntonym = (TextView) findViewById(R.id.displayAntonym);
         String wordSearched = enter_word.getText().toString();
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET,
                 "https://www.dictionaryapi.com/api/v3/references/thesaurus/json/" + wordSearched +
@@ -82,12 +91,16 @@ public class MainActivity extends AppCompatActivity {
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(final JSONObject response) {
-                        String antonyms = getAntonyms(response);
+                        String antonyms;
+                        try {
+                            antonyms = getAntonyms(response);
+                        } catch (JSONException exception) {
+                            antonyms = "Invalid Argument";
+                        }
                         Log.d(TAG, response.toString());
                         displayAntonym.setText(antonyms);
                     }
                 }, new Response.ErrorListener() {
-            @Override
             public void onErrorResponse(final VolleyError error) {
                 Log.w(TAG, error.toString());
             }
