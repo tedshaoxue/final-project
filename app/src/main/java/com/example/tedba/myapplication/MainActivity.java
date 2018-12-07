@@ -17,6 +17,7 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 
@@ -24,12 +25,6 @@ import org.json.*;
 
 
 public class MainActivity extends AppCompatActivity {
-    /**
-     * Add try-catch block to api call
-     * Do something with requestQueue
-     * Hope it works
-     */
-
     /* Default Logging Tag */
     private static final String TAG = "Antonym Finder";
     private static RequestQueue requestQueue;
@@ -37,12 +32,14 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        requestQueue = Volley.newRequestQueue(this);
         setContentView(R.layout.activity_main);
+        requestQueue = Volley.newRequestQueue(this);
         /*
         Button handlers for antonym search
         */
-        final Button search = (Button) findViewById(R.id.search);
+        final TextView displayAntonym = findViewById(R.id.displayAntonym);
+        final Button search = findViewById(R.id.search);
+        final EditText enter_word = findViewById(R.id.enter_word);
         search.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -53,13 +50,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /* Temporary Method*/
-    public String getAntonyms(final JSONObject input) throws JSONException{
-        if (input.getJSONObject("meta").getJSONArray("ants").length() == 0) {
+    public String getAntonyms(final JSONArray input) throws JSONException{
+        Log.d(TAG, "response4");
+        if (input.getJSONObject(0).getJSONObject("meta").getJSONArray("ants").length() == 0) {
             return "Word has no antonyms";
         }
         String toReturn = "";
         JSONArray antArray = input
-                .getJSONObject("meta")
+                .getJSONObject(0)
                 .getJSONArray("def")
                 .getJSONObject(0)
                 .getJSONArray("sseq")
@@ -81,30 +79,36 @@ public class MainActivity extends AppCompatActivity {
      * method to use api and find the antonyms.
      */
     public void findAntonyms() {
-        final EditText enter_word = (EditText) findViewById(R.id.enter_word);
-        final TextView displayAntonym = (TextView) findViewById(R.id.displayAntonym);
+        Log.d(TAG, "response1");
+        final EditText enter_word = findViewById(R.id.enter_word);
+        final TextView displayAntonym = findViewById(R.id.displayAntonym);
         String wordSearched = enter_word.getText().toString();
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET,
-                "https://www.dictionaryapi.com/api/v3/references/thesaurus/json/" + wordSearched +
-                        "?key=e267e542-c713-405e-9de9-916e1f134128",
-                null,
-                new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(final JSONObject response) {
-                        String antonyms;
-                        try {
-                            antonyms = getAntonyms(response);
-                        } catch (JSONException exception) {
-                            antonyms = "Invalid Argument";
+        Log.d(TAG, "response2");
+        try {
+            JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET,
+                    "https://www.dictionaryapi.com/api/v3/references/thesaurus/json/"
+                            + wordSearched + "?key=e267e542-c713-405e-9de9-916e1f134128",
+                    null,
+                    new Response.Listener<JSONArray>() {
+                        public void onResponse(final JSONArray response) {
+                            try {
+                                Log.d(TAG, response.toString());
+                                String antonyms = getAntonyms(response);
+                                displayAntonym.setText(antonyms);
+                            } catch (JSONException exception) {
+                                displayAntonym.setText("The word you entered does not exist");
+                            }
                         }
-                        Log.d(TAG, response.toString());
-                        displayAntonym.setText(antonyms);
-                    }
-                }, new Response.ErrorListener() {
-            public void onErrorResponse(final VolleyError error) {
-                Log.w(TAG, error.toString());
-            }
-        });
+                    }, new Response.ErrorListener() {
+                public void onErrorResponse(final VolleyError error) {
+                    Log.w(TAG, error.toString());
+                }
+            });
+            requestQueue.add(jsonArrayRequest);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        Log.d(TAG, "response3");
     }
 
     @Override
