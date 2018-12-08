@@ -1,10 +1,7 @@
 package com.example.tedba.myapplication;
 
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.view.Menu;
@@ -12,21 +9,19 @@ import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
-import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
-
 import org.json.*;
 
 
 public class MainActivity extends AppCompatActivity {
-    /* Default Logging Tag */
+    /* Default Logging Tag. */
     private static final String TAG = "Antonym Finder";
+    /* Request Queue. */
     private static RequestQueue requestQueue;
 
     @Override
@@ -37,9 +32,7 @@ public class MainActivity extends AppCompatActivity {
         /*
         Button handlers for antonym search
         */
-        final TextView displayAntonym = findViewById(R.id.displayAntonym);
         final Button search = findViewById(R.id.search);
-        final EditText enter_word = findViewById(R.id.enter_word);
         search.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -49,9 +42,8 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    /* Temporary Method*/
+    /* Method that takes the returned JsonArray from the api and parses it to return a String containing the antonyms for a given word*/
     public String getAntonyms(final JSONArray input) throws JSONException{
-        Log.d(TAG, "response4");
         if (input.getJSONObject(0).getJSONObject("meta").getJSONArray("ants").length() == 0) {
             return "Word has no antonyms";
         }
@@ -76,14 +68,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * method to use api and find the antonyms.
+     * Method that calls the api and uses the String returned by getAntonyms to display it on the UI
      */
     public void findAntonyms() {
-        Log.d(TAG, "response1");
         final EditText enter_word = findViewById(R.id.enter_word);
         final TextView displayAntonym = findViewById(R.id.displayAntonym);
         String wordSearched = enter_word.getText().toString();
-        Log.d(TAG, "response2");
         try {
             JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET,
                     "https://www.dictionaryapi.com/api/v3/references/thesaurus/json/"
@@ -108,7 +98,6 @@ public class MainActivity extends AppCompatActivity {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        Log.d(TAG, "response3");
     }
 
     @Override
